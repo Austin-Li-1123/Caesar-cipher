@@ -1,0 +1,165 @@
+import java.util.Arrays;
+import java.util.Scanner;
+
+
+public class CaesarCipher {
+
+    /** Minimum shift that encrypt and decrypt need to handle. */
+    public static final int MIN_SHIFT = -1024;
+
+    /** Maximum shift that encrypt and decrypt need to handle. */
+    public static final int MAX_SHIFT = 1024;
+
+    /**
+  
+     * @see <a href="http://www.asciitable.com/">ASCII Character Table</a>
+     * @return return a type of char[]
+     * @param line is the input
+     * @param shift is the rightward direction of shift
+     *
+     */
+    public static char[] encrypt(final char[] line, final int shift) {
+        if (shift > MAX_SHIFT || shift < MIN_SHIFT) {
+            return null;
+        }
+        int shiftCopy = shift;
+        final int maxChar = 126;
+        final int minChar = 32;
+        char[] copyLine = Arrays.copyOf(line, line.length);
+
+        for (int i = 0; i < copyLine.length; i++) {
+            if ((int) line[i] < minChar || (int) line[i] > maxChar) {
+            return null;
+            }
+
+            shiftCopy = shiftCopy % (maxChar - minChar + 1);
+
+            if (shiftCopy >= 0) {
+                if (shiftCopy + (int) copyLine[i] <= maxChar) {
+                    copyLine[i] = (char) ((int) line[i] + shiftCopy);
+                } else {
+                    copyLine[i] = (char) (minChar + (shiftCopy - (maxChar - (int) line[i]) - 1));
+                }
+            } else {
+                if ((int) copyLine[i] + shiftCopy >= minChar) {
+                    copyLine[i] = (char) ((int) line[i] + shiftCopy);
+                } else {
+                    shiftCopy *= -1;
+                    copyLine[i] = (char) (maxChar - (shiftCopy - ((int) line[i] - minChar) - 1));
+                    shiftCopy *= -1;
+                }
+
+            }
+
+
+
+
+        }
+
+        return copyLine;
+    }
+
+   
+    public static char[] decrypt(final char[] line, final int shift) {
+        if (shift > MAX_SHIFT || shift < MIN_SHIFT) {
+            return null;
+        }
+        int shiftCopy = shift;
+        final int maxChar = 126;
+        final int minChar = 32;
+        char[] copyLineTwo = Arrays.copyOf(line, line.length);
+
+        for (int i = 0; i < copyLineTwo.length; i++) {
+            if ((int) line[i] < minChar || (int) line[i] > maxChar) {
+            return null;
+            }
+
+            shiftCopy = shiftCopy % (maxChar - minChar + 1);
+
+            if (shiftCopy >= 0) {
+                if ((int) copyLineTwo[i] - shiftCopy >= minChar) {
+                    copyLineTwo[i] = (char) ((int) line[i] - shiftCopy);
+                } else {
+                    copyLineTwo[i] = (char) (maxChar - (shiftCopy - ((int) line[i] - minChar) - 1));
+                }
+            } else {
+                if ((int) copyLineTwo[i] - shiftCopy <= maxChar) {
+                    copyLineTwo[i] = (char) ((int) line[i] - shiftCopy);
+                } else {
+                    shiftCopy *= -1;
+                    copyLineTwo[i] = (char) (minChar + (shiftCopy - (maxChar - (int) line[i]) - 1));
+                    shiftCopy *= -1;
+                }
+            }
+
+
+
+        }
+
+        return copyLineTwo;
+
+    }
+
+    @SuppressWarnings("resource")
+    public static void main(final String[] unused) {
+
+        String linePrompt = String.format("Enter a line of text, or a blank line to exit:");
+        String shiftPrompt = String.format("Enter an integer to shift by:");
+
+        /*
+         * Two steps here: first get a line, then a shift integer.
+         */
+        Scanner lineScanner = new Scanner(System.in);
+        repeat: while (true) {
+            String line = null;
+            Integer shift = null;
+
+            System.out.println(linePrompt);
+            while (lineScanner.hasNextLine()) {
+                line = lineScanner.nextLine();
+                if (line.equals("")) {
+                    break repeat;
+                } else {
+                    break;
+                }
+            }
+
+            System.out.println(shiftPrompt);
+            while (lineScanner.hasNextLine()) {
+                Scanner intScanner = new Scanner(lineScanner.nextLine());
+                if (intScanner.hasNextInt()) {
+                    shift = intScanner.nextInt();
+                    if (intScanner.hasNext()) {
+                        shift = null;
+                        System.out.println("Invalid input: please enter only a single integer.");
+                    }
+                } else {
+                    System.out.println("Invalid input: please enter an integer.");
+                }
+                intScanner.close();
+                if (shift != null) {
+                    break;
+                }
+            }
+
+            if (line == null || line.equals("")) {
+                throw new RuntimeException("Should have a line at this point");
+            }
+            if (shift == null) {
+                throw new RuntimeException("Should have a shift value at this point");
+            }
+
+            char[] originalCharacterArray = line.toCharArray();
+            char[] encryptedCharacterArray = encrypt(originalCharacterArray, shift);
+            char[] decryptedCharacterArray = decrypt(encryptedCharacterArray, shift);
+
+            System.out.println("Encrypted line with ROT-" + shift + ":");
+            System.out.println(String.valueOf(encryptedCharacterArray));
+            System.out.println("Original line:");
+            System.out.println(String.valueOf(originalCharacterArray));
+            System.out.println("Decrypted line:");
+            System.out.println(String.valueOf(decryptedCharacterArray));
+        }
+        lineScanner.close();
+    }
+}
